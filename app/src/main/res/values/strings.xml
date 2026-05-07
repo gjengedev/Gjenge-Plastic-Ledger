@@ -1,0 +1,67 @@
+<resources>
+    <string name="app_name">Gjenge Plastic Ledger</string>
+    <string name="registering">Registering...</string>
+    <string name="register">Register</string>
+
+    <!-- Collector Dashboard -->
+    <string name="hi_collector">Hi Collector!</string>
+    <string name="good_morning">Good Morning</string>
+    <string name="user_email">User Email</string>
+    <string name="official_collector">Official Collector</string>
+    <string name="plastic_kg">Plastic Kg</string>
+    <string name="credits_label">Credits</string>
+    <string name="gjenge_id">Gjenge ID</string>
+    <string name="my_information">My Information</string>
+    <string name="national_id_hint">National ID Number</string>
+    <string name="current_location_hint">Current Location</string>
+    <string name="select_gender">Select Gender</string>
+    <string name="update_profile">Update Profile</string>
+    <string name="log_collection">Log Collection</string>
+    <string name="weight_hint">Weight (Kg)</string>
+    <string name="plastic_type_hint">Plastic Type (e.g. PET)</string>
+    <string name="add_to_ledger">Add to Ledger</string>
+    <string name="submit_for_approval">Submit for Approval</string>
+    <string name="id_display">ID: %1$s</string>
+    <string name="location_display">Location: %1$s</string>
+    <string name="id_not_set">ID: Not Set</string>
+    <string name="location_not_set">Location: Not Set</string>
+    <string name="logout">Log out</string>
+    <string name="recent_logs">Recent Collections</string>
+    <string name="plastic_type">Select Plastic Type</string>
+    <string name="estimated_balance">Estimated Earnings</string>
+    <string name="currency_ksh">KSh </string>
+    <string name="hello_collector_name">Hello, %1$s</string>
+    <string name="log_plastic">Log Plastic</string>
+    <string name="withdraw">Withdraw</string>
+    <string name="rates_key">Payment Rates &amp; Credits</string>
+    <string name="pet_rate">PET: 15 KSh/kg (10 Credits)</string>
+    <string name="hdpe_rate">HDPE: 20 KSh/kg (15 Credits)</string>
+    <string name="ldpe_rate">LDPE: 18 KSh/kg (12 Credits)</string>
+    <string name="see_all">See all</string>
+    <string name="status_pending">Pending</string>
+    <string name="status_approved">Approved</string>
+    <string name="status_paid">Paid</string>
+    <string name="collection_item_title">%1$s Collection</string>
+    <string name="collection_item_subtitle">%1$.2f kg • Estimated KSh %2$.2f</string>
+
+    <!-- Profile Activity -->
+    <string name="upload_id_front">Upload ID Front</string>
+    <string name="upload_id_back">Upload ID Back</string>
+    <string name="profile_settings">Profile Settings</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="save_changes">Save Changes</string>
+
+    <!-- Register Activity -->
+    <string name="journey_starts_here">Your journey starts here</string>
+    <string name="registration">Registration</string>
+    <string name="email_hint">E-mail</string>
+    <string name="password_hint">Password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="already_have_account">Already have an account? </string>
+    <string name="sign_in">Sign in</string>
+    <string name="or_divider">  or  </string>
+
+    <!-- Main Activity -->
+    <string name="login">LOGIN</string>
+    <string name="dont_have_account">Don\'t have an account? Register</string>
+</resources>

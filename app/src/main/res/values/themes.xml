@@ -1,0 +1,15 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.GjengePlasticLedger" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+        <!-- Primary colors -->
+        <item name="colorPrimary">#22C55E</item>
+        <item name="colorPrimaryVariant">#16A34A</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Secondary -->
+        <item name="colorSecondary">#0F172A</item>
+
+    </style>
+
+</resources>

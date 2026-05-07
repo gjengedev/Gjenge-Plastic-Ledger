@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "232333817256",
+    "project_id": "gjengeplasticledger",
+    "storage_bucket": "gjengeplasticledger.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232333817256:android:818eef2fcb7204653b199d",
+        "android_client_info": {
+          "package_name": "com.example.gjengeplasticledger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9kiyR33GeJHcX9KInHO4mQUBS3j9NGM4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

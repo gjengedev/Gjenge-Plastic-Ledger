@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="14dp"
+    android:background="@drawable/bg_gradient"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:elevation="4dp"
+        android:gravity="center"
+        android:background="@color/containerBg"
+        >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="20dp">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/g4e_no_bg"
+            android:contentDescription="@string/app_name"
+            android:layout_marginEnd="16dp"/>
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/gjenge_no_bg"
+            android:contentDescription="@string/app_name"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/sign_in"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/email_hint"
+        android:textColor="@color/white"
+        android:textColorHint="#FFFF"
+        android:backgroundTint="@color/lightGreen"
+        android:inputType="textEmailAddress"
+        android:autofillHints="emailAddress"/>
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/password_hint"
+        android:textColor="@color/white"
+        android:textColorHint="#FFFF"
+        android:inputType="textPassword"
+        android:backgroundTint="@color/lightGreen"
+        android:autofillHints="password"/>
+
+    <Spinner
+        android:id="@+id/roleSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/bg_spinner_pill"
+        android:backgroundTint="#FFF"
+        android:popupBackground="#000"/>
+
+        <com.google.android.material.button.MaterialButton
+        android:id="@+id/loginBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/login"
+        android:backgroundTint="@color/lightGreen"
+        android:textColor="@color/white"
+        android:layout_marginTop="16dp"
+            app:cornerRadius="30dp" />
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/dont_have_account"
+        android:textColor="@color/lightBlue"
+        android:layout_marginTop="16dp"/>
+</LinearLayout>
+
+</LinearLayout>
