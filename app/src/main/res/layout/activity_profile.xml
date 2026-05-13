@@ -144,14 +144,14 @@
                         android:layout_height="50dp"
                         android:background="@drawable/bg_spinner_pill"
                         android:backgroundTint="#F3F4F6"
-                        android:popupBackground="#000000"
+                        android:popupBackground="#FFFFFF"
                         android:layout_marginBottom="20dp"/>
 
                     <!-- ID UPLOAD SECTION -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Verify Identity"
+                        android:text="Verify Identity (Mandatory for Withdrawals)"
                         android:textStyle="bold"
                         android:textColor="#333333"
                         android:layout_marginBottom="8dp"
@@ -161,12 +161,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginBottom="20dp"
+                        android:baselineAligned="false">
 
                         <LinearLayout
                             android:id="@+id/btnUploadFront"
                             android:layout_width="0dp"
-                            android:layout_height="80dp"
+                            android:layout_height="100dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_input"
                             android:backgroundTint="#F3F4F6"
@@ -174,24 +175,28 @@
                             android:orientation="vertical"
                             android:layout_marginEnd="8dp">
                             <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
+                                android:id="@+id/idFrontImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerInside"
                                 android:src="@android:drawable/ic_menu_camera"
                                 app:tint="#777777"
                                 android:contentDescription="@string/upload_id_front"/>
                             <TextView
+                                android:id="@+id/txtFront"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/upload_id_front"
-                                android:textSize="12sp"
+                                android:textSize="10sp"
                                 android:textColor="#777777"
-                                android:layout_marginTop="4dp"/>
+                                android:layout_marginTop="4dp"
+                                tools:ignore="SmallSp"/>
                         </LinearLayout>
 
                         <LinearLayout
                             android:id="@+id/btnUploadBack"
                             android:layout_width="0dp"
-                            android:layout_height="80dp"
+                            android:layout_height="100dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_pill_input"
                             android:backgroundTint="#F3F4F6"
@@ -199,18 +204,22 @@
                             android:orientation="vertical"
                             android:layout_marginStart="8dp">
                             <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
+                                android:id="@+id/idBackImage"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerInside"
                                 android:src="@android:drawable/ic_menu_camera"
                                 app:tint="#777777"
                                 android:contentDescription="@string/upload_id_back"/>
                             <TextView
+                                android:id="@+id/txtBack"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/upload_id_back"
-                                android:textSize="12sp"
+                                android:textSize="10sp"
                                 android:textColor="#777777"
-                                android:layout_marginTop="4dp"/>
+                                android:layout_marginTop="4dp"
+                                tools:ignore="SmallSp"/>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -227,4 +236,7 @@
 
         </LinearLayout>
     </ScrollView>
+
+
+
 </RelativeLayout>

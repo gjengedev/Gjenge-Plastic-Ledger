@@ -6,311 +6,445 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient">
 
-    <ScrollView
+    <!-- PAGE CONTAINER -->
+    <FrameLayout
+        android:id="@+id/page_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_navigation"
-        android:fillViewport="true">
+        android:layout_above="@id/bottom_navigation">
 
-        <LinearLayout
+        <!-- HOME PAGE -->
+        <ScrollView
+            android:id="@+id/home_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:visibility="visible">
 
-            <!-- HEADER -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="25dp">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/profilePicCard"
-                    android:layout_width="45dp"
-                    android:layout_height="45dp"
-                    app:cardCornerRadius="22dp"
-                    android:layout_centerVertical="true">
-                    <ImageView
-                        android:id="@+id/profileImage"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/male_placeholder"
-                        android:contentDescription="@string/app_name"/>
-                </com.google.android.material.card.MaterialCardView>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_toEndOf="@id/profilePicCard"
-                    android:layout_toStartOf="@id/logoutBtn"
-                    android:layout_marginStart="12dp"
-                    android:layout_centerVertical="true">
-                    <TextView
-                        android:id="@+id/profileName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Hello, Collector"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:ignore="HardcodedText"/>
-                    <TextView
-                        android:id="@+id/gjengeIdDisplay"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="GPL-XXXX"
-                        android:textColor="#BBDEFB"
-                        android:textSize="12sp"
-                        tools:ignore="HardcodedText"/>
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/logoutBtn"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/logout"
-                    android:textColor="#D32F2F"
-                    app:icon="@android:drawable/ic_lock_power_off"
-                    app:iconTint="#D32F2F"
-                    android:textAllCaps="false"/>
-            </RelativeLayout>
-
-            <!-- WALLET CARD -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="24dp"
-                android:backgroundTint="#1B3D3D"
-                android:layout_marginBottom="20dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/estimated_balance"
-                        android:textColor="#BBDEFB"
-                        android:textSize="14sp"/>
-
-                    <TextView
-                        android:id="@+id/totalEarningsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="KSh 0.00"
-                        android:textColor="#FFFFFF"
-                        android:textSize="32sp"
-                        android:textStyle="bold"
-                        android:layout_marginTop="8dp"
-                        tools:ignore="HardcodedText"/>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="20dp"
-                        android:gravity="center">
-
-                        <Button
-                            android:id="@+id/showLogSectionBtn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/log_plastic"
-                            android:backgroundTint="#A3E635"
-                            android:textColor="#0F172A"
-                            app:cornerRadius="12dp"
-                            android:layout_marginEnd="10dp"
-                            android:textAllCaps="false"/>
-
-                        <Button
-                            android:id="@+id/withdrawBtn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/withdraw"
-                            android:backgroundTint="#D1FAE5"
-                            android:textColor="#0F172A"
-                            app:cornerRadius="12dp"
-                            android:textAllCaps="false"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- RATES & INFO -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                android:backgroundTint="#2D3A4A"
-                android:layout_marginBottom="20dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/rates_key"
-                        android:textColor="#A3E635"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/pet_rate"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/hdpe_rate"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/ldpe_rate"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- INPUT SECTION (HIDDEN BY DEFAULT) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/logPlasticCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                android:backgroundTint="#FFFFFF"
-                android:layout_marginBottom="25dp"
-                android:visibility="gone">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/log_collection"
-                        android:textStyle="bold"
-                        android:textColor="#333333"
-                        android:layout_marginBottom="12dp"/>
-
-                    <EditText
-                        android:id="@+id/plasticInput"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:hint="@string/weight_hint"
-                        android:textColorHint="#000000"
-                        android:textColor="#000000"
-                        android:inputType="numberDecimal"
-                        android:background="@drawable/bg_pill_input"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
-                        android:layout_marginBottom="12dp"
-                        android:autofillHints="none"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/plastic_type"
-                        android:textColor="#000000"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp"/>
-                    <Spinner
-                        android:id="@+id/plasticTypeSpinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:background="@drawable/bg_spinner_pill"
-                        android:popupBackground="#FFFFFF"
-                        android:layout_marginBottom="16dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Upload Collection Photo"
-                        android:textStyle="bold"
-                        android:textColor="#333333"
-                        android:layout_marginBottom="8dp"
-                        tools:ignore="HardcodedText"/>
-
-                    <LinearLayout
-                        android:id="@+id/btnUploadPlasticPhoto"
-                        android:layout_width="match_parent"
-                        android:layout_height="120dp"
-                        android:background="@drawable/bg_pill_input"
-                        android:backgroundTint="#F3F4F6"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="16dp">
-
-                        <ImageView
-                            android:id="@+id/plasticPhotoPreview"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerInside"
-                            android:src="@android:drawable/ic_menu_camera"
-                            app:tint="#777777"
-                            android:contentDescription="Plastic Photo Preview" />
-                    </LinearLayout>
-
-                    <Button
-                        android:id="@+id/addBtn"
-                        android:layout_width="match_parent"
-                        android:layout_height="55dp"
-                        android:text="@string/submit_for_approval"
-                        android:backgroundTint="#1565C0"
-                        app:cornerRadius="28dp"
-                        android:textAllCaps="false"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- RECENT TRANSACTIONS HEADER -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/recent_logs"
-                    android:textStyle="bold"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/see_all"
-                    android:textColor="#A3E635"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"/>
-            </RelativeLayout>
-
-            <!-- LOG ENTRIES LIST -->
             <LinearLayout
-                android:id="@+id/logsContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginBottom="80dp">
-                <!-- Entries will be added here -->
-            </LinearLayout>
+                android:padding="20dp">
 
-        </LinearLayout>
-    </ScrollView>
+                <!-- HEADER -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="25dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/profilePicCard"
+                        android:layout_width="45dp"
+                        android:layout_height="45dp"
+                        app:cardCornerRadius="22dp"
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/profileImage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/male_placeholder"
+                            android:contentDescription="@string/app_name"/>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/profilePicCard"
+                        android:layout_toStartOf="@id/logoutBtn"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true">
+                        <TextView
+                            android:id="@+id/profileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Hello, Collector"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:ignore="HardcodedText"/>
+                        <TextView
+                            android:id="@+id/gjengeIdDisplay"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="GPL-XXXX"
+                            android:textColor="#BBDEFB"
+                            android:textSize="12sp"
+                            tools:ignore="HardcodedText"/>
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/logoutBtn"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/logout"
+                        android:textColor="#D32F2F"
+                        app:icon="@android:drawable/ic_lock_power_off"
+                        app:iconTint="#D32F2F"
+                        android:textAllCaps="false"/>
+                </RelativeLayout>
+
+                <!-- CREDITS CARD (HOME) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="24dp"
+                    android:backgroundTint="#1B3D3D"
+                    android:layout_marginBottom="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/total_credits"
+                            android:textColor="#BBDEFB"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/totalCreditsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 pts"
+                            android:textColor="#FFFFFF"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            tools:ignore="HardcodedText"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginTop="20dp"
+                            android:gravity="center">
+
+                            <Button
+                                android:id="@+id/showLogSectionBtn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/log_plastic"
+                                android:backgroundTint="#A3E635"
+                                android:textColor="#0F172A"
+                                app:cornerRadius="12dp"
+                                android:layout_marginEnd="10dp"
+                                android:textAllCaps="false"/>
+
+                            <Button
+                                android:id="@+id/withdrawBtnHome"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/withdraw"
+                                android:backgroundTint="#D1FAE5"
+                                android:textColor="#0F172A"
+                                app:cornerRadius="12dp"
+                                android:textAllCaps="false"/>
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- RATES & INFO -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    android:backgroundTint="#2D3A4A"
+                    android:layout_marginBottom="20dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/rates_key"
+                            android:textColor="#A3E635"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pet_rate"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/hdpe_rate"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ldpe_rate"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- INPUT SECTION (HIDDEN BY DEFAULT) -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/logPlasticCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="20dp"
+                    android:backgroundTint="#FFFFFF"
+                    android:layout_marginBottom="25dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/log_collection"
+                            android:textStyle="bold"
+                            android:textColor="#333333"
+                            android:layout_marginBottom="12dp"/>
+
+                        <EditText
+                            android:id="@+id/plasticInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:hint="@string/weight_hint"
+                            android:textColorHint="#000000"
+                            android:textColor="#000000"
+                            android:inputType="numberDecimal"
+                            android:background="@drawable/bg_pill_input"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="20dp"
+                            android:layout_marginBottom="12dp"
+                            android:autofillHints="none"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/plastic_type"
+                            android:textColor="#000000"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+                        <Spinner
+                            android:id="@+id/plasticTypeSpinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:background="@drawable/bg_spinner_pill"
+                            android:popupBackground="#FFFFFF"
+                            android:layout_marginBottom="16dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Upload Collection Photo"
+                            android:textStyle="bold"
+                            android:textColor="#333333"
+                            android:layout_marginBottom="8dp"
+                            tools:ignore="HardcodedText"/>
+
+                        <LinearLayout
+                            android:id="@+id/btnUploadPlasticPhoto"
+                            android:layout_width="match_parent"
+                            android:layout_height="120dp"
+                            android:background="@drawable/bg_pill_input"
+                            android:backgroundTint="#F3F4F6"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:layout_marginBottom="16dp">
+                            <ImageView
+                                android:id="@+id/plasticPhotoPreview"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerInside"
+                                android:src="@android:drawable/ic_menu_camera"
+                                app:tint="#777777"
+                                android:contentDescription="Plastic Photo Preview" />
+                        </LinearLayout>
+
+                        <Button
+                            android:id="@+id/addBtn"
+                            android:layout_width="match_parent"
+                            android:layout_height="55dp"
+                            android:text="@string/submit_for_approval"
+                            android:backgroundTint="#1565C0"
+                            app:cornerRadius="28dp"
+                            android:textAllCaps="false"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- RECENT COLLECTIONS HEADER -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/recent_logs"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"/>
+                </RelativeLayout>
+
+                <!-- LOG ENTRIES LIST -->
+                <LinearLayout
+                    android:id="@+id/logsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="80dp">
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- WALLET PAGE -->
+        <ScrollView
+            android:id="@+id/wallet_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My Wallet"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="20dp"
+                    tools:ignore="HardcodedText"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="24dp"
+                    android:backgroundTint="#1B3D3D"
+                    android:layout_marginBottom="25dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/estimated_balance"
+                            android:textColor="#BBDEFB"
+                            android:textSize="14sp"/>
+
+                        <TextView
+                            android:id="@+id/walletTotalEarningsText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="KSh 0.00"
+                            android:textColor="#FFFFFF"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            tools:ignore="HardcodedText"/>
+
+                        <Button
+                            android:id="@+id/withdrawBtnWallet"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/withdraw"
+                            android:backgroundTint="#A3E635"
+                            android:textColor="#0F172A"
+                            app:cornerRadius="12dp"
+                            android:layout_marginTop="20dp"
+                            android:textAllCaps="false"/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- STATISTICS PAGE -->
+        <ScrollView
+            android:id="@+id/stats_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/stats_title"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- PIE CHART -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    app:cardCornerRadius="20dp"
+                    android:layout_marginBottom="20dp">
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/statsPieChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All Time Collections"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="12dp"
+                    tools:ignore="HardcodedText"/>
+
+                <LinearLayout
+                    android:id="@+id/allStatsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="80dp">
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </FrameLayout>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"

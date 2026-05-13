@@ -29,6 +29,16 @@
     <string name="recent_logs">Recent Collections</string>
     <string name="plastic_type">Select Plastic Type</string>
     <string name="estimated_balance">Estimated Earnings</string>
+    <string name="total_credits">Total Credits</string>
+    <string name="total_credits_display">%1$d pts</string>
+    <string name="wallet_balance">Wallet Balance</string>
+    <string name="stats_title">Collection Statistics</string>
+    <string name="withdraw_prompt">Withdraw Funds</string>
+    <string name="amount_hint">Amount to withdraw</string>
+    <string name="id_number_hint">Confirm National ID</string>
+    <string name="upload_required">You must upload your ID front and back in your profile before you can withdraw.</string>
+    <string name="insufficient_funds">Insufficient funds or credits.</string>
+    <string name="withdrawal_success">Withdrawal request submitted!</string>
     <string name="currency_ksh">KSh </string>
     <string name="hello_collector_name">Hello, %1$s</string>
     <string name="log_plastic">Log Plastic</string>
