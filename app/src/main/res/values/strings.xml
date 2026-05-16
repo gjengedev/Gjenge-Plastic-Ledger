@@ -58,6 +58,9 @@
     <string name="upload_id_front">Upload ID Front</string>
     <string name="upload_id_back">Upload ID Back</string>
     <string name="profile_settings">Profile Settings</string>
+    <string name="identity_verified">Identity Verified ✓</string>
+    <string name="identity_not_verified">Identity Not Verified</string>
+    <string name="profile_saved">Profile Saved Successfully!</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="save_changes">Save Changes</string>
 

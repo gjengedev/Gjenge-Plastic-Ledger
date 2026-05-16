@@ -45,12 +45,14 @@ class CollectorDashboard : AppCompatActivity() {
     private lateinit var homeContainer: View
     private lateinit var walletContainer: View
     private lateinit var statsContainer: View
-    
+
     private var selectedImageUri: Uri? = null
     private var currentTotalEarnings = 0.0
     private var currentTotalCredits = 0
     private var currentNationalId = ""
     private var isIdUploaded = false
+
+    private var currentCollectorName = "Collector"
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -205,17 +207,19 @@ class CollectorDashboard : AppCompatActivity() {
 
     private fun processWithdrawal(amount: Double) {
         val userId = auth.currentUser?.uid ?: return
-        val newEarnings = currentTotalEarnings - amount
-        val newCredits = currentTotalCredits - amount.toInt()
         
-        val updates = mapOf(
-            "totalEarnings" to newEarnings,
-            "totalCredits" to if (newCredits > 0) newCredits else 0
+        val withdrawalRequest = hashMapOf(
+            "userId" to userId,
+            "collectorName" to currentCollectorName,
+            "amount" to amount,
+            "nationalID" to currentNationalId,
+            "status" to "Pending",
+            "timestamp" to System.currentTimeMillis()
         )
-        
-        db.collection("Users").document(userId).update(updates)
+
+        db.collection("Withdrawals").add(withdrawalRequest)
             .addOnSuccessListener {
-                Toast.makeText(this, getString(R.string.withdrawal_success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Withdrawal request submitted for Admin approval", Toast.LENGTH_LONG).show()
             }
     }
 
@@ -227,7 +231,8 @@ class CollectorDashboard : AppCompatActivity() {
 
         val logId = UUID.randomUUID().toString()
         if (selectedImageUri != null) {
-            val ref = storage.reference.child("logs/$logId.jpg")
+            // Updated path to sort by Collector Name and Plastic Type
+            val ref = storage.reference.child("plastic_logs/$currentCollectorName/$type/$logId.jpg")
             ref.putFile(selectedImageUri!!).addOnSuccessListener {
                 ref.downloadUrl.addOnSuccessListener { url ->
                     saveLogToFirestore(userId, kg, type, payment, credits, url.toString(), input)
@@ -297,12 +302,13 @@ class CollectorDashboard : AppCompatActivity() {
                 val gid = doc.getString("gjengeID") ?: "GPL-NEW"
                 val gender = doc.getString("gender") ?: "Male"
                 currentNationalId = doc.getString("nationalID") ?: ""
-                
+
                 val front = doc.getString("idFrontUrl") ?: ""
                 val back = doc.getString("idBackUrl") ?: ""
                 isIdUploaded = front.isNotEmpty() && back.isNotEmpty()
 
                 val firstName = email?.split("@")?.get(0) ?: "Collector"
+                currentCollectorName = firstName
                 nameTxt.text = getString(R.string.hello_collector_name, firstName)
                 idTxt.text = gid
                 

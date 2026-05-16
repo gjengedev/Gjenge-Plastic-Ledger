@@ -1,10 +1,135 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:gravity="center"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient">
 
-    <TextView
-        android:text="Admin Dashboard"
-        android:textSize="24sp" android:layout_height="wrap_content" android:layout_width="wrap_content"/>
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_above="@id/admin_bottom_navigation">
+
+        <!-- HEADER -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginBottom="15dp">
+
+            <TextView
+                android:id="@+id/adminGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Admin Panel"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/adminLogoutBtn"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:text="Logout"
+                android:textColor="#D32F2F"
+                app:icon="@android:drawable/ic_lock_power_off"
+                app:iconTint="#D32F2F"
+                android:textAllCaps="false"
+                tools:ignore="HardcodedText"/>
+        </RelativeLayout>
+
+        <!-- SEARCH BAR (Visual like in image) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardCornerRadius="25dp"
+            android:layout_marginBottom="20dp"
+            android:backgroundTint="#2D3A4A">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_menu_search"
+                    app:tint="#BBDEFB"
+                    android:contentDescription="Search" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Search collectors or logs..."
+                    android:textColor="#777777"
+                    android:layout_marginStart="10dp"
+                    tools:ignore="HardcodedText" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CONTENT AREA -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/adminContentContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="20dp">
+
+                <!-- Dynamic Title -->
+                <TextView
+                    android:id="@+id/adminSectionTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pending Logs"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="15dp"
+                    tools:ignore="HardcodedText"/>
+
+                <LinearLayout
+                    android:id="@+id/adminItemsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <!-- Logs or Withdrawals as cards -->
+                </LinearLayout>
+
+                <GridLayout
+                    android:id="@+id/adminCollectorsGrid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:visibility="gone">
+                    <!-- Collector cards from image reference -->
+                </GridLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+    </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/admin_bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#FFFFFF"
+        app:menu="@menu/admin_nav_menu"
+        app:itemIconTint="#2D3A4A"
+        app:itemTextColor="#2D3A4A"
+        app:labelVisibilityMode="labeled"/>
+
+</RelativeLayout>

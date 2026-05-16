@@ -20,6 +20,9 @@ class MainActivity : AppCompatActivity() {
         spinner.adapter = adapter
 
         val auth = FirebaseAuth.getInstance()
+        
+        // Setup Admin Account if it doesn't exist
+        setupAdminAccount(auth)
 
         val email = findViewById<EditText>(R.id.email)
         val password = findViewById<EditText>(R.id.password)
@@ -96,5 +99,21 @@ class MainActivity : AppCompatActivity() {
         registerText.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+    }
+
+    private fun setupAdminAccount(auth: FirebaseAuth) {
+        val adminEmail = "nzambimatee@gmail.com"
+        val adminPass = "Pamb10"
+
+        auth.createUserWithEmailAndPassword(adminEmail, adminPass)
+            .addOnSuccessListener { task ->
+                val userMap = hashMapOf(
+                    "email" to adminEmail,
+                    "role" to "Admin",
+                    "gjengeID" to "GPL-ADMIN"
+                )
+                FirebaseFirestore.getInstance().collection("Users").document(task.user!!.uid)
+                    .set(userMap)
+            }
     }
 }

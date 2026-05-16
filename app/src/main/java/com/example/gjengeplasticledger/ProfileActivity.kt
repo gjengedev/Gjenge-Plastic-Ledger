@@ -1,10 +1,12 @@
 package com.example.gjengeplasticledger
 
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
+import android.view.View
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -22,9 +24,12 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var genderSpinner: Spinner
     private lateinit var idFrontPreview: ImageView
     private lateinit var idBackPreview: ImageView
-    
+    private lateinit var uploadSection: LinearLayout
+    private lateinit var verifyStatusText: TextView
+
     private var frontUri: Uri? = null
     private var backUri: Uri? = null
+    private var currentCollectorName = "Collector"
 
     private val pickFrontLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -52,12 +57,14 @@ class ProfileActivity : AppCompatActivity() {
         val profileNameLarge = findViewById<TextView>(R.id.profileNameLarge)
         val gjengeIdLarge = findViewById<TextView>(R.id.gjengeIdLarge)
         profileImageLarge = findViewById(R.id.profileImageLarge)
+        verifyStatusText = findViewById(R.id.verifyStatusText)
 
         val nationalIdInput = findViewById<EditText>(R.id.nationalIdInput)
         val locationInput = findViewById<EditText>(R.id.locationInput)
         genderSpinner = findViewById(R.id.genderSpinner)
         val saveProfileBtn = findViewById<Button>(R.id.saveProfileBtn)
 
+        uploadSection = findViewById(R.id.uploadSection)
         val btnUploadFront = findViewById<LinearLayout>(R.id.btnUploadFront)
         val btnUploadBack = findViewById<LinearLayout>(R.id.btnUploadBack)
         idFrontPreview = findViewById(R.id.idFrontImage)
@@ -79,7 +86,9 @@ class ProfileActivity : AppCompatActivity() {
                         val nID = doc.getString("nationalID") ?: ""
                         val loc = doc.getString("location") ?: ""
                         val gender = doc.getString("gender") ?: "Male"
+                        val isVerified = doc.getBoolean("idVerified") ?: false
 
+                        currentCollectorName = email?.split("@")?.get(0) ?: "Collector"
                         profileNameLarge.text = email
                         gjengeIdLarge.text = gid
                         nationalIdInput.setText(nID)
@@ -87,8 +96,21 @@ class ProfileActivity : AppCompatActivity() {
                         
                         val pos = genders.indexOf(gender)
                         if (pos >= 0) genderSpinner.setSelection(pos)
-                        
+
                         updateProfilePicture(gender)
+
+                        if (isVerified) {
+                            verifyStatusText.text = getString(R.string.identity_verified)
+                            verifyStatusText.setTextColor(Color.parseColor("#16A34A"))
+                            uploadSection.visibility = View.GONE
+                            saveProfileBtn.visibility = View.GONE
+                            nationalIdInput.isEnabled = false
+                            locationInput.isEnabled = false
+                            genderSpinner.isEnabled = false
+                        } else {
+                            verifyStatusText.text = getString(R.string.identity_not_verified)
+                            verifyStatusText.setTextColor(Color.parseColor("#D32F2F"))
+                        }
                     }
                 }
         }
@@ -106,15 +128,9 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-
-        backBtn.setOnClickListener {
-            navigateToDashboard()
-        }
-
+        backBtn.setOnClickListener { navigateToDashboard() }
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                navigateToDashboard()
-            }
+            override fun handleOnBackPressed() { navigateToDashboard() }
         })
     }
 
@@ -133,7 +149,7 @@ class ProfileActivity : AppCompatActivity() {
         updates["gender"] = gen
 
         if (frontUri != null) {
-            val ref = storage.reference.child("ids/$userId-front.jpg")
+            val ref = storage.reference.child("ids/$currentCollectorName/front.jpg")
             ref.putFile(frontUri!!).addOnSuccessListener {
                 ref.downloadUrl.addOnSuccessListener { url ->
                     updates["idFrontUrl"] = url.toString()
@@ -147,7 +163,7 @@ class ProfileActivity : AppCompatActivity() {
 
     private fun uploadBackPhoto(userId: String, updates: HashMap<String, Any>) {
         if (backUri != null) {
-            val ref = storage.reference.child("ids/$userId-back.jpg")
+            val ref = storage.reference.child("ids/$currentCollectorName/back.jpg")
             ref.putFile(backUri!!).addOnSuccessListener {
                 ref.downloadUrl.addOnSuccessListener { url ->
                     updates["idBackUrl"] = url.toString()
@@ -163,7 +179,7 @@ class ProfileActivity : AppCompatActivity() {
         db.collection("Users").document(userId).update(updates as Map<String, Any>)
             .addOnSuccessListener {
                 updateProfilePicture(updates["gender"] as String)
-                Toast.makeText(this, "Profile Saved Successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.profile_saved), Toast.LENGTH_SHORT).show()
             }
     }
 
