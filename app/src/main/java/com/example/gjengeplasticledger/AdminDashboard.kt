@@ -24,6 +24,7 @@ class AdminDashboard : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private lateinit var itemsList: LinearLayout
+    private lateinit var collectorsList: LinearLayout
     private lateinit var collectorsGrid: GridLayout
     private lateinit var sectionTitle: TextView
     private val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
@@ -35,6 +36,7 @@ class AdminDashboard : AppCompatActivity() {
         setContentView(R.layout.activity_admin_dashboard)
 
         itemsList = findViewById(R.id.adminItemsList)
+        collectorsList = findViewById(R.id.adminCollectorsList)
         collectorsGrid = findViewById(R.id.adminCollectorsGrid)
         sectionTitle = findViewById(R.id.adminSectionTitle)
         val bottomNav = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.admin_bottom_navigation)
@@ -73,7 +75,8 @@ class AdminDashboard : AppCompatActivity() {
             else -> "Registered Collectors"
         }
         itemsList.visibility = if (type == "Collectors") View.GONE else View.VISIBLE
-        collectorsGrid.visibility = if (type == "Collectors") View.VISIBLE else View.GONE
+        collectorsList.visibility = if (type == "Collectors") View.VISIBLE else View.GONE
+        collectorsGrid.visibility = View.GONE
     }
 
     private fun listenForAllLogs() {
@@ -91,25 +94,46 @@ class AdminDashboard : AppCompatActivity() {
                     val logId = doc.id
                     val userRef = doc.reference.parent.parent
 
-                    val card = createAdminCard("$type Collection - $weight Kg", status, timestamp)
-                    
-                    if (status == "Pending") {
-                        val btnLayout = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-                        val approveBtn = Button(this).apply {
-                            text = "Approve"
-                            setBackgroundColor(Color.parseColor("#16A34A"))
-                            setOnClickListener { updateLogStatus(userRef?.id, logId, "Approved") }
+                    userRef?.get()?.addOnSuccessListener { userDoc ->
+                        val collectorName = userDoc.getString("firstName")?.let { "$it ${userDoc.getString("lastName") ?: ""}" } 
+                            ?: userDoc.getString("email")?.split("@")?.get(0) ?: "Collector"
+                        val gjengeId = userDoc.getString("gjengeID") ?: "GPL-NEW"
+                        
+                        val card = createAdminCard(
+                            titleStr = "$type Collection - $weight Kg",
+                            status = status,
+                            time = timestamp,
+                            collectorName = collectorName,
+                            gjengeId = gjengeId
+                        )
+                        
+                        if (status == "Pending") {
+                            val btnLayout = LinearLayout(this).apply { 
+                                orientation = LinearLayout.HORIZONTAL
+                                setPadding(0, 16.dpToPx(), 0, 0)
+                                gravity = Gravity.END
+                            }
+                            val approveBtn = Button(this).apply {
+                                text = "Approve"
+                                setBackgroundColor(Color.parseColor("#16A34A"))
+                                setTextColor(Color.WHITE)
+                                setOnClickListener { updateLogStatus(userRef.id, logId, "Approved") }
+                            }
+                            val denyBtn = Button(this).apply {
+                                text = "Deny"
+                                setBackgroundColor(Color.parseColor("#D32F2F"))
+                                setTextColor(Color.WHITE)
+                                val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                                params.marginStart = 8.dpToPx()
+                                layoutParams = params
+                                setOnClickListener { updateLogStatus(userRef.id, logId, "Denied") }
+                            }
+                            btnLayout.addView(approveBtn)
+                            btnLayout.addView(denyBtn)
+                            (card.getChildAt(0) as LinearLayout).addView(btnLayout)
                         }
-                        val denyBtn = Button(this).apply {
-                            text = "Deny"
-                            setBackgroundColor(Color.parseColor("#D32F2F"))
-                            setOnClickListener { updateLogStatus(userRef?.id, logId, "Denied") }
-                        }
-                        btnLayout.addView(approveBtn)
-                        btnLayout.addView(denyBtn)
-                        (card.getChildAt(0) as LinearLayout).addView(btnLayout)
+                        itemsList.addView(card)
                     }
-                    itemsList.addView(card)
                 }
             }
     }
@@ -129,17 +153,34 @@ class AdminDashboard : AppCompatActivity() {
                     val userId = doc.getString("userId") ?: ""
                     val docId = doc.id
 
-                    val card = createAdminCard("Withdrawal: KSh $amount ($name)", status, timestamp)
+                    // Fetch the user's Gjenge ID as well
+                    db.collection("Users").document(userId).get().addOnSuccessListener { userDoc ->
+                        val gjengeId = userDoc.getString("gjengeID") ?: "GPL-NEW"
+                        val card = createAdminCard(
+                            titleStr = "Withdrawal: KSh $amount",
+                            status = status,
+                            time = timestamp,
+                            collectorName = name,
+                            gjengeId = gjengeId
+                        )
 
-                    if (status == "Pending") {
-                        val approveBtn = Button(this).apply {
-                            text = "Process & Email"
-                            setBackgroundColor(Color.parseColor("#16A34A"))
-                            setOnClickListener { approveWithdrawal(docId, userId, amount) }
+                        if (status == "Pending") {
+                            val btnLayout = LinearLayout(this).apply { 
+                                orientation = LinearLayout.HORIZONTAL
+                                setPadding(0, 16.dpToPx(), 0, 0)
+                                gravity = Gravity.END
+                            }
+                            val approveBtn = Button(this).apply {
+                                text = "Process & Email"
+                                setBackgroundColor(Color.parseColor("#16A34A"))
+                                setTextColor(Color.WHITE)
+                                setOnClickListener { approveWithdrawal(docId, userId, amount) }
+                            }
+                            btnLayout.addView(approveBtn)
+                            (card.getChildAt(0) as LinearLayout).addView(btnLayout)
                         }
-                        (card.getChildAt(0) as LinearLayout).addView(approveBtn)
+                        itemsList.addView(card)
                     }
-                    itemsList.addView(card)
                 }
             }
     }
@@ -148,68 +189,150 @@ class AdminDashboard : AppCompatActivity() {
         db.collection("Users").whereEqualTo("role", "Collector")
             .addSnapshotListener { snapshots, e ->
                 if (e != null) return@addSnapshotListener
-                collectorsGrid.removeAllViews()
+                collectorsList.removeAllViews()
 
                 snapshots?.forEachIndexed { index, doc ->
-                    val name = doc.getString("email")?.split("@")?.get(0) ?: "User"
+                    val email = doc.getString("email") ?: "User"
+                    val firstName = doc.getString("firstName") ?: ""
+                    val lastName = doc.getString("lastName") ?: ""
+                    val displayName = if (firstName.isNotEmpty()) "$firstName $lastName" else email.split("@")[0]
+                    
                     val gjengeId = doc.getString("gjengeID") ?: "GPL-NEW"
+                    val gender = doc.getString("gender") ?: "Male"
+                    val location = doc.getString("location") ?: "Unknown"
                     val color = cardColors[index % cardColors.size]
                     val userId = doc.id
 
                     db.collection("Users").document(userId).collection("Logs").get()
                         .addOnSuccessListener { logs ->
                             val logCount = logs.size()
-                            val card = createCollectorCard(name, gjengeId, color, logCount)
+                            val card = createCollectorCardNew(displayName, gjengeId, gender, location, color, logCount, userId)
                             card.setOnClickListener { showCollectorDetails(userId) }
-                            collectorsGrid.addView(card)
+                            collectorsList.addView(card)
                         }
                 }
             }
     }
 
-    private fun createCollectorCard(name: String, gid: String, colorHex: String, logCount: Int): MaterialCardView {
+    private fun createCollectorCardNew(name: String, gid: String, gender: String, location: String, colorHex: String, logCount: Int, userId: String): MaterialCardView {
         val card = MaterialCardView(this).apply {
-            val params = GridLayout.LayoutParams()
-            params.width = 0
-            params.height = GridLayout.LayoutParams.WRAP_CONTENT
-            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
-            params.setMargins(8, 8, 8, 8)
-            layoutParams = params
-            radius = 32f
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                110.dpToPx()
+            ).apply { setMargins(0, 0, 0, 16.dpToPx()) }
+            radius = 28.dpToPx().toFloat()
             setCardBackgroundColor(Color.parseColor(colorHex))
             cardElevation = 0f
         }
 
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(32, 48, 32, 48)
+        val mainLayout = RelativeLayout(this).apply {
+            layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            setPadding(16.dpToPx(), 0, 16.dpToPx(), 0)
         }
 
-        layout.addView(TextView(this).apply {
-            text = name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+        // Circular Profile Image
+        val profileCard = MaterialCardView(this).apply {
+            id = View.generateViewId()
+            layoutParams = RelativeLayout.LayoutParams(80.dpToPx(), 80.dpToPx()).apply {
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            radius = 40.dpToPx().toFloat()
+            cardElevation = 0f
+            setCardBackgroundColor(Color.WHITE)
+            
+            val img = ImageView(context).apply {
+                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                setImageResource(if (gender == "Female") R.drawable.female_placeholder else R.drawable.male_placeholder)
+            }
+            addView(img)
+        }
+
+        // Info Layout
+        val infoLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val params = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                addRule(RelativeLayout.END_OF, profileCard.id)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+                marginStart = 16.dpToPx()
+            }
+            layoutParams = params
+        }
+
+        infoLayout.addView(TextView(this).apply {
+            text = name
             textSize = 18f
             setTextColor(Color.BLACK)
             setTypeface(null, Typeface.BOLD)
-            gravity = Gravity.CENTER
         })
 
-        layout.addView(TextView(this).apply {
-            text = gid
-            textSize = 12f
-            setTextColor(Color.parseColor("#66000000"))
-            setPadding(0, 8, 0, 0)
+        infoLayout.addView(TextView(this).apply {
+            text = gender
+            textSize = 13f
+            setTextColor(Color.parseColor("#99000000"))
         })
 
-        layout.addView(TextView(this).apply {
-            text = "$logCount logs made"
+        infoLayout.addView(TextView(this).apply {
+            text = "$logCount collections made"
             textSize = 12f
             setTextColor(Color.parseColor("#99000000"))
-            setPadding(0, 4, 0, 0)
+            setPadding(0, 2.dpToPx(), 0, 0)
         })
 
-        card.addView(layout)
+        infoLayout.addView(TextView(this).apply {
+            text = "📍 $location"
+            textSize = 12f
+            setTextColor(Color.BLACK)
+            setTypeface(null, Typeface.BOLD)
+            setPadding(0, 6.dpToPx(), 0, 0)
+        })
+
+        // Delete Button
+        val deleteBtn = ImageButton(this).apply {
+            setImageResource(android.R.drawable.ic_menu_delete)
+            setBackgroundColor(Color.TRANSPARENT)
+            setColorFilter(Color.parseColor("#D32F2F"))
+            val params = RelativeLayout.LayoutParams(40.dpToPx(), 40.dpToPx()).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+                bottomMargin = 8.dpToPx()
+            }
+            layoutParams = params
+            setOnClickListener {
+                confirmDeleteCollector(userId, name)
+            }
+        }
+
+        mainLayout.addView(profileCard)
+        mainLayout.addView(infoLayout)
+        mainLayout.addView(deleteBtn)
+        
+        card.addView(mainLayout)
         return card
+    }
+
+    private fun confirmDeleteCollector(userId: String, name: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete Collector")
+            .setMessage("Are you sure you want to delete $name? They will no longer be able to log in.")
+            .setPositiveButton("Delete") { _, _ ->
+                deleteCollector(userId)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun deleteCollector(userId: String) {
+        db.collection("Users").document(userId).delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Collector deleted successfully", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error deleting collector: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun showCollectorDetails(userId: String) {
@@ -310,34 +433,108 @@ class AdminDashboard : AppCompatActivity() {
         try { startActivity(Intent.createChooser(intent, "Send Email")) } catch (e: Exception) {}
     }
 
-    private fun createAdminCard(titleStr: String, status: String, time: Long): MaterialCardView {
+    private fun createAdminCard(titleStr: String, status: String, time: Long, collectorName: String, gjengeId: String): MaterialCardView {
         val card = MaterialCardView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 0, 0, 16) }
-            radius = 24f
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 0, 0, 16.dpToPx()) }
+            radius = 24.dpToPx().toFloat()
             setCardBackgroundColor(Color.WHITE)
-            cardElevation = 2f
+            cardElevation = 2.dpToPx().toFloat()
+            strokeWidth = 1.dpToPx()
+            strokeColor = Color.parseColor("#F3F4F6")
         }
-        val layout = LinearLayout(this).apply {
+
+        val mainLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 24, 24, 24)
+            setPadding(24.dpToPx(), 24.dpToPx(), 24.dpToPx(), 24.dpToPx())
         }
-        layout.addView(TextView(this).apply {
-            text = titleStr
+
+        // Header with Avatar and Name
+        val headerLayout = RelativeLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val avatar = MaterialCardView(this).apply {
+            id = View.generateViewId()
+            layoutParams = RelativeLayout.LayoutParams(40.dpToPx(), 40.dpToPx())
+            radius = 20.dpToPx().toFloat()
+            setCardBackgroundColor(Color.parseColor("#F3F4F6"))
+            cardElevation = 0f
+            
+            addView(TextView(context).apply {
+                text = collectorName.take(1).uppercase()
+                gravity = Gravity.CENTER
+                setTextColor(Color.parseColor("#6B7280"))
+                textSize = 14f
+                setTypeface(null, Typeface.BOLD)
+                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+            })
+        }
+
+        val nameInfoLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+            params.addRule(RelativeLayout.END_OF, avatar.id)
+            params.marginStart = 12.dpToPx()
+            layoutParams = params
+        }
+
+        nameInfoLayout.addView(TextView(this).apply {
+            text = collectorName
             textSize = 16f
             setTextColor(Color.BLACK)
             setTypeface(null, Typeface.BOLD)
         })
-        layout.addView(TextView(this).apply {
-            text = "Status: $status | ${sdf.format(Date(time))}"
-            textSize = 13f
-            setTextColor(when (status) {
-                "Pending" -> Color.parseColor("#CA8A04")
-                "Approved" -> Color.parseColor("#16A34A")
-                "Denied" -> Color.parseColor("#D32F2F")
-                else -> Color.parseColor("#16A34A")
-            })
+
+        nameInfoLayout.addView(TextView(this).apply {
+            text = "ID: $gjengeId"
+            textSize = 12f
+            setTextColor(Color.parseColor("#6B7280"))
         })
-        card.addView(layout)
+
+        val statusBadge = TextView(this).apply {
+            text = status
+            textSize = 10f
+            setTypeface(null, Typeface.BOLD)
+            val badgeColor = when (status) {
+                "Pending" -> Color.parseColor("#FEF3C7") to Color.parseColor("#92400E")
+                "Approved", "Paid" -> Color.parseColor("#D1FAE5") to Color.parseColor("#065F46")
+                "Denied", "Rejected" -> Color.parseColor("#FEE2E2") to Color.parseColor("#991B1B")
+                else -> Color.parseColor("#F3F4F6") to Color.parseColor("#374151")
+            }
+            setBackgroundResource(android.R.drawable.editbox_dropdown_light_frame) // Temporary background
+            setPadding(8.dpToPx(), 4.dpToPx(), 8.dpToPx(), 4.dpToPx())
+            setTextColor(badgeColor.second)
+            
+            val params = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+            params.addRule(RelativeLayout.ALIGN_PARENT_END)
+            params.addRule(RelativeLayout.CENTER_VERTICAL)
+            layoutParams = params
+        }
+
+        headerLayout.addView(avatar)
+        headerLayout.addView(nameInfoLayout)
+        headerLayout.addView(statusBadge)
+
+        mainLayout.addView(headerLayout)
+
+        // Title and Time
+        mainLayout.addView(TextView(this).apply {
+            text = titleStr
+            textSize = 18f
+            setTextColor(Color.parseColor("#1F2937"))
+            setTypeface(null, Typeface.BOLD)
+            setPadding(0, 16.dpToPx(), 0, 4.dpToPx())
+        })
+
+        mainLayout.addView(TextView(this).apply {
+            text = sdf.format(Date(time))
+            textSize = 12f
+            setTextColor(Color.parseColor("#9CA3AF"))
+        })
+
+        card.addView(mainLayout)
         return card
     }
+
+    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
 }

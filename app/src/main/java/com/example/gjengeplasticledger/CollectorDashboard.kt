@@ -1,9 +1,12 @@
 package com.example.gjengeplasticledger
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,7 +25,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -30,7 +33,6 @@ class CollectorDashboard : AppCompatActivity() {
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private val storage = FirebaseStorage.getInstance()
     
     private lateinit var profileImage: ImageView
     private lateinit var plasticTypeSpinner: Spinner
@@ -38,6 +40,7 @@ class CollectorDashboard : AppCompatActivity() {
     private lateinit var allStatsContainer: LinearLayout
     private lateinit var totalEarningsText: TextView
     private lateinit var totalCreditsText: TextView
+    private lateinit var withdrawalsContainer: LinearLayout
     private lateinit var logPlasticCard: MaterialCardView
     private lateinit var plasticPhotoPreview: ImageView
     private lateinit var statsPieChart: PieChart
@@ -80,6 +83,7 @@ class CollectorDashboard : AppCompatActivity() {
         val gjengeIdDisplay = findViewById<TextView>(R.id.gjengeIdDisplay)
         totalEarningsText = findViewById(R.id.walletTotalEarningsText)
         totalCreditsText = findViewById(R.id.totalCreditsText)
+        withdrawalsContainer = findViewById(R.id.withdrawalsContainer)
 
         logPlasticCard = findViewById(R.id.logPlasticCard)
         val plasticInput = findViewById<EditText>(R.id.plasticInput)
@@ -115,15 +119,16 @@ class CollectorDashboard : AppCompatActivity() {
             logPlasticCard.isVisible = !logPlasticCard.isVisible
         }
 
-        // Handle withdrawal from both Dashboard and Wallet page
-        val withdrawBtnHome = findViewById<Button>(R.id.withdrawBtnHome)
+        // Handle withdrawal and redemption
+        val redeemBtnHome = findViewById<Button>(R.id.redeemCreditsBtnHome)
         val withdrawBtnWallet = findViewById<Button>(R.id.withdrawBtnWallet)
         
-        val withdrawListener = View.OnClickListener {
+        redeemBtnHome.setOnClickListener {
+            showRedeemCreditsDialog()
+        }
+        withdrawBtnWallet.setOnClickListener {
             showWithdrawDialog()
         }
-        withdrawBtnHome.setOnClickListener(withdrawListener)
-        withdrawBtnWallet.setOnClickListener(withdrawListener)
 
         findViewById<Button>(R.id.logoutBtn).setOnClickListener {
             auth.signOut()
@@ -141,6 +146,7 @@ class CollectorDashboard : AppCompatActivity() {
         if (userId != null) {
             fetchUserDetails(userId, profileName, gjengeIdDisplay)
             listenForLogs(userId)
+            listenForWithdrawals(userId)
         }
 
         addBtn.setOnClickListener {
@@ -205,6 +211,54 @@ class CollectorDashboard : AppCompatActivity() {
             .show()
     }
 
+    private fun showRedeemCreditsDialog() {
+        val input = EditText(this).apply {
+            hint = "Credits to redeem"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setPadding(20, 20, 20, 20)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Redeem Credits")
+            .setMessage("Current Credits: $currentTotalCredits pts\nEnter amount to redeem:")
+            .setView(input)
+            .setPositiveButton("Redeem") { _, _ ->
+                val creditsToRedeem = input.text.toString().toIntOrNull() ?: 0
+                if (creditsToRedeem > 0 && creditsToRedeem <= currentTotalCredits) {
+                    processRedemption(creditsToRedeem)
+                } else {
+                    Toast.makeText(this, "Insufficient credits", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun processRedemption(creditsToRedeem: Int) {
+        val userId = auth.currentUser?.uid ?: return
+        val newCredits = currentTotalCredits - creditsToRedeem
+
+        val batch = db.batch()
+        val userRef = db.collection("Users").document(userId)
+        batch.update(userRef, "totalCredits", newCredits)
+
+        val redemptionRef = userRef.collection("Redemptions").document()
+        val redemptionData = hashMapOf(
+            "amount" to creditsToRedeem,
+            "timestamp" to System.currentTimeMillis(),
+            "type" to "Redemption"
+        )
+        batch.set(redemptionRef, redemptionData)
+
+        batch.commit()
+            .addOnSuccessListener {
+                Toast.makeText(this, "$creditsToRedeem credits redeemed successfully!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to redeem credits: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+
     private fun processWithdrawal(amount: Double) {
         val userId = auth.currentUser?.uid ?: return
         
@@ -229,28 +283,54 @@ class CollectorDashboard : AppCompatActivity() {
         val payment = kg * (rates[type] ?: 0.0)
         val credits = (kg * (creditsMap[type] ?: 0)).toInt()
 
-        val logId = UUID.randomUUID().toString()
+        var imageBase64 = ""
         if (selectedImageUri != null) {
-            // Updated path to sort by Collector Name and Plastic Type
-            val ref = storage.reference.child("plastic_logs/$currentCollectorName/$type/$logId.jpg")
-            ref.putFile(selectedImageUri!!).addOnSuccessListener {
-                ref.downloadUrl.addOnSuccessListener { url ->
-                    saveLogToFirestore(userId, kg, type, payment, credits, url.toString(), input)
-                }
-            }
-        } else {
-            saveLogToFirestore(userId, kg, type, payment, credits, "", input)
+            imageBase64 = uriToBase64(selectedImageUri!!) ?: ""
+        }
+        
+        saveLogToFirestore(userId, kg, type, payment, credits, imageBase64, input)
+    }
+
+    private fun uriToBase64(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            val scaledBitmap = scaleBitmap(bitmap)
+            val outputStream = ByteArrayOutputStream()
+            scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
+            val byteArray = outputStream.toByteArray()
+            Base64.encodeToString(byteArray, Base64.DEFAULT)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
-    private fun saveLogToFirestore(userId: String, kg: Double, type: String, payment: Double, credits: Int, imageUrl: String, input: EditText) {
+    private fun scaleBitmap(source: Bitmap): Bitmap {
+        val maxSize = 600 // Smaller for logs to save space
+        var width = source.width
+        var height = source.height
+        val bitmapRatio = width.toFloat() / height.toFloat()
+        if (bitmapRatio > 1) {
+            width = maxSize
+            height = (width / bitmapRatio).toInt()
+        } else {
+            height = maxSize
+            width = (height * bitmapRatio).toInt()
+        }
+        return Bitmap.createScaledBitmap(source, width, height, true)
+    }
+
+    private fun saveLogToFirestore(userId: String, kg: Double, type: String, payment: Double, credits: Int, imageBase64: String, input: EditText) {
         val log = hashMapOf(
             "weight" to kg,
             "type" to type,
             "payment" to payment,
             "credits" to credits,
             "status" to "Pending",
-            "imageUrl" to imageUrl,
+            "imageBase64" to imageBase64,
             "timestamp" to System.currentTimeMillis()
         )
 
@@ -261,6 +341,8 @@ class CollectorDashboard : AppCompatActivity() {
                 plasticPhotoPreview.setImageResource(android.R.drawable.ic_menu_camera)
                 logPlasticCard.visibility = View.GONE
                 Toast.makeText(this, "Log submitted for approval", Toast.LENGTH_SHORT).show()
+            }.addOnFailureListener { e ->
+                Toast.makeText(this, "Failed to save log: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
@@ -300,17 +382,28 @@ class CollectorDashboard : AppCompatActivity() {
             if (doc != null && doc.exists()) {
                 val email = doc.getString("email")
                 val gid = doc.getString("gjengeID") ?: "GPL-NEW"
+                val firstName = doc.getString("firstName") ?: ""
+                val lastName = doc.getString("lastName") ?: ""
                 val gender = doc.getString("gender") ?: "Male"
                 currentNationalId = doc.getString("nationalID") ?: ""
 
-                val front = doc.getString("idFrontUrl") ?: ""
-                val back = doc.getString("idBackUrl") ?: ""
+                val front = doc.getString("idFrontBase64") ?: ""
+                val back = doc.getString("idBackBase64") ?: ""
                 isIdUploaded = front.isNotEmpty() && back.isNotEmpty()
 
-                val firstName = email?.split("@")?.get(0) ?: "Collector"
-                currentCollectorName = firstName
-                nameTxt.text = getString(R.string.hello_collector_name, firstName)
+                val displayName = if (firstName.isNotEmpty()) "$firstName $lastName" else email?.split("@")?.get(0) ?: "Collector"
+                currentCollectorName = if (firstName.isNotEmpty()) firstName else displayName
+                nameTxt.text = getString(R.string.hello_collector_name, displayName)
                 idTxt.text = gid
+                
+                val profileBase64 = doc.getString("profileImageBase64") ?: ""
+                if (profileBase64.isNotEmpty()) {
+                    val decodedString = Base64.decode(profileBase64, Base64.DEFAULT)
+                    val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+                    profileImage.setImageBitmap(decodedByte)
+                } else {
+                    updateProfilePicture(gender)
+                }
                 
                 currentTotalEarnings = doc.getDouble("totalEarnings") ?: 0.0
                 currentTotalCredits = doc.getLong("totalCredits")?.toInt() ?: 0
@@ -324,32 +417,206 @@ class CollectorDashboard : AppCompatActivity() {
     }
 
     private fun listenForLogs(userId: String) {
-        db.collection("Users").document(userId).collection("Logs")
+        val userDoc = db.collection("Users").document(userId)
+        
+        // Listen to Logs
+        userDoc.collection("Logs")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) return@addSnapshotListener
+                updateStatsList(userId)
+            }
+            
+        // Listen to Redemptions
+        userDoc.collection("Redemptions")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) return@addSnapshotListener
+                updateStatsList(userId)
+            }
+    }
 
+    private fun updateStatsList(userId: String) {
+        val userDoc = db.collection("Users").document(userId)
+        
+        // Fetch both and combine
+        userDoc.collection("Logs").get().addOnSuccessListener { logs ->
+            userDoc.collection("Redemptions").get().addOnSuccessListener { redemptions ->
+                val combinedList = mutableListOf<Map<String, Any>>()
+                
+                logs.forEach { doc -> 
+                    val data = doc.data.toMutableMap()
+                    data["docType"] = "Log"
+                    combinedList.add(data)
+                }
+                
+                redemptions.forEach { doc -> 
+                    val data = doc.data.toMutableMap()
+                    data["docType"] = "Redemption"
+                    combinedList.add(data)
+                }
+                
+                // Sort by timestamp descending
+                combinedList.sortByDescending { it["timestamp"] as Long }
+                
                 logsContainer.removeAllViews()
                 allStatsContainer.removeAllViews()
                 
                 val monthCounts = mutableMapOf<String, Int>()
                 val sdf = SimpleDateFormat("MMM yyyy", Locale.getDefault())
 
-                snapshots?.forEach { doc ->
-                    val kg = doc.getDouble("weight") ?: 0.0
-                    val type = doc.getString("type") ?: ""
-                    val payment = doc.getDouble("payment") ?: 0.0
-                    val status = doc.getString("status") ?: "Pending"
-                    val timestamp = doc.getLong("timestamp") ?: 0L
+                combinedList.forEach { item ->
+                    val type = item["docType"] as String
+                    val timestamp = item["timestamp"] as Long
                     
-                    val month = sdf.format(Date(timestamp))
-                    monthCounts[month] = (monthCounts[month] ?: 0) + 1
+                    if (type == "Log") {
+                        val kg = (item["weight"] as? Number)?.toDouble() ?: 0.0
+                        val plasticType = item["type"] as? String ?: ""
+                        val payment = (item["payment"] as? Number)?.toDouble() ?: 0.0
+                        val status = item["status"] as? String ?: "Pending"
+                        
+                        val month = sdf.format(Date(timestamp))
+                        monthCounts[month] = (monthCounts[month] ?: 0) + 1
 
-                    addLogView(kg, type, payment, status, logsContainer)
-                    addLogView(kg, type, payment, status, allStatsContainer)
+                        addLogView(kg, plasticType, payment, status, logsContainer)
+                        addLogView(kg, plasticType, payment, status, allStatsContainer)
+                    } else {
+                        val amount = (item["amount"] as? Number)?.toInt() ?: 0
+                        addRedemptionView(amount, timestamp, allStatsContainer)
+                    }
                 }
                 updatePieChart(monthCounts)
             }
+        }
+    }
+
+    private fun addRedemptionView(amount: Int, timestamp: Long, container: LinearLayout) {
+        val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+        val dateStr = sdf.format(Date(timestamp))
+
+        val card = MaterialCardView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(0, 0, 0, 12.dpToPx()) }
+            radius = 12.dpToPx().toFloat()
+            setCardBackgroundColor(Color.parseColor("#FFF4F4")) // Light red background for redemption
+            cardElevation = 2.dpToPx().toFloat()
+        }
+
+        val layout = RelativeLayout(this).apply { setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx()) }
+        val infoLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+        
+        infoLayout.addView(TextView(this).apply {
+            text = "Redeemed: $amount Credits"
+            textSize = 16f
+            setTextColor(Color.parseColor("#991B1B"))
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+        
+        infoLayout.addView(TextView(this).apply {
+            text = dateStr
+            textSize = 12f
+            setTextColor(Color.GRAY)
+        })
+        
+        val statusTxt = TextView(this).apply {
+            text = "Completed"
+            textSize = 12f
+            setTextColor(Color.parseColor("#991B1B"))
+            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            setPadding(8.dpToPx(), 4.dpToPx(), 8.dpToPx(), 4.dpToPx())
+            setBackgroundResource(android.R.drawable.editbox_dropdown_light_frame)
+        }
+        
+        layout.addView(infoLayout)
+        layout.addView(statusTxt)
+        card.addView(layout)
+        container.addView(card)
+    }
+
+    private fun listenForWithdrawals(userId: String) {
+        db.collection("Withdrawals")
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    return@addSnapshotListener
+                }
+
+                withdrawalsContainer.removeAllViews()
+                snapshots?.forEach { doc ->
+                    val amount = doc.getDouble("amount") ?: 0.0
+                    val status = doc.getString("status") ?: "Pending"
+                    val timestamp = doc.getLong("timestamp") ?: 0L
+                    
+                    addWithdrawalView(amount, status, timestamp)
+                }
+            }
+    }
+
+    private fun addWithdrawalView(amount: Double, status: String, timestamp: Long) {
+        val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault())
+        val dateStr = sdf.format(Date(timestamp))
+
+        val card = MaterialCardView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(0, 0, 0, 12.dpToPx()) }
+            radius = 12.dpToPx().toFloat()
+            setCardBackgroundColor(Color.WHITE)
+            cardElevation = 2.dpToPx().toFloat()
+        }
+
+        val layout = RelativeLayout(this).apply { setPadding(16.dpToPx(), 16.dpToPx(), 16.dpToPx(), 16.dpToPx()) }
+        
+        val infoLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
+
+        infoLayout.addView(TextView(this).apply {
+            text = "Withdrawal: KSh ${String.format("%.2f", amount)}"
+            textSize = 16f
+            setTextColor(Color.BLACK)
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        })
+
+        infoLayout.addView(TextView(this).apply {
+            text = dateStr
+            textSize = 12f
+            setTextColor(Color.GRAY)
+        })
+
+        val statusTxt = TextView(this).apply {
+            text = status
+            textSize = 12f
+            val color = when (status) {
+                "Paid" -> ContextCompat.getColor(context, android.R.color.holo_green_dark)
+                "Approved" -> ContextCompat.getColor(context, android.R.color.holo_blue_dark)
+                "Rejected" -> ContextCompat.getColor(context, android.R.color.holo_red_dark)
+                else -> ContextCompat.getColor(context, android.R.color.holo_orange_dark)
+            }
+            setTextColor(color)
+            layoutParams = RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+                addRule(RelativeLayout.ALIGN_PARENT_END)
+                addRule(RelativeLayout.CENTER_VERTICAL)
+            }
+            setPadding(8.dpToPx(), 4.dpToPx(), 8.dpToPx(), 4.dpToPx())
+            setBackgroundResource(android.R.drawable.editbox_dropdown_light_frame)
+        }
+
+        layout.addView(infoLayout)
+        layout.addView(statusTxt)
+        card.addView(layout)
+        withdrawalsContainer.addView(card)
     }
 
     private fun updatePieChart(data: Map<String, Int>) {

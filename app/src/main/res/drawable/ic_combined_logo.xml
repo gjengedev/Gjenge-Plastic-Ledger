@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Bottom Logo (Gjenge) -->
+    <item
+        android:drawable="@drawable/gjenge_no_bg"
+        android:width="80dp"
+        android:height="80dp"
+        android:gravity="center"
+        android:top="-20dp"/>
+
+    <!-- Top Logo (G4E) -->
+    <item
+        android:drawable="@drawable/g4e_no_bg"
+        android:width="60dp"
+        android:height="60dp"
+        android:gravity="center"
+        android:top="25dp"/>
+</layer-list>

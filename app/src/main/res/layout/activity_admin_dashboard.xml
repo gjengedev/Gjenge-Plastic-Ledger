@@ -107,13 +107,21 @@
                     <!-- Logs or Withdrawals as cards -->
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/adminCollectorsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                </LinearLayout>
+
                 <GridLayout
                     android:id="@+id/adminCollectorsGrid"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2"
                     android:visibility="gone">
-                    <!-- Collector cards from image reference -->
+                    <!-- Kept for compatibility but hidden -->
                 </GridLayout>
 
             </LinearLayout>

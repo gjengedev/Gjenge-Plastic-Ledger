@@ -43,6 +43,7 @@
     <string name="hello_collector_name">Hello, %1$s</string>
     <string name="log_plastic">Log Plastic</string>
     <string name="withdraw">Withdraw</string>
+    <string name="redeem_credits">Redeem Credits</string>
     <string name="rates_key">Payment Rates &amp; Credits</string>
     <string name="pet_rate">PET: 15 KSh/kg (10 Credits)</string>
     <string name="hdpe_rate">HDPE: 20 KSh/kg (15 Credits)</string>
@@ -55,6 +56,12 @@
     <string name="collection_item_subtitle">%1$.2f kg • Estimated KSh %2$.2f</string>
 
     <!-- Profile Activity -->
+    <string name="first_name_hint">First Name</string>
+    <string name="middle_name_hint">Middle Name (Optional)</string>
+    <string name="last_name_hint">Last Name</string>
+    <string name="save_confirmation">Are you sure? No changes will be made after saving.</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="upload_id_front">Upload ID Front</string>
     <string name="upload_id_back">Upload ID Back</string>
     <string name="profile_settings">Profile Settings</string>

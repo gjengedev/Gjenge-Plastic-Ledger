@@ -43,19 +43,43 @@
             </RelativeLayout>
 
             <!-- PROFILE PIC & BASIC INFO -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                app:cardCornerRadius="50dp"
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp">
-                <ImageView
-                    android:id="@+id/profileImageLarge"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/male_placeholder"
-                    android:contentDescription="Profile Picture"/>
-            </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/profilePicCardLarge"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:cardCornerRadius="50dp">
+                    <ImageView
+                        android:id="@+id/profileImageLarge"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/male_placeholder"
+                        android:contentDescription="Profile Picture"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btnEditProfilePic"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    app:cardCornerRadius="16dp"
+                    android:layout_alignBottom="@id/profilePicCardLarge"
+                    android:layout_alignEnd="@id/profilePicCardLarge"
+                    android:backgroundTint="#22C55E"
+                    app:cardElevation="4dp">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:src="@android:drawable/ic_menu_camera"
+                        app:tint="#FFFFFF"
+                        android:contentDescription="Edit Profile Picture"/>
+                </com.google.android.material.card.MaterialCardView>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/profileNameLarge"
@@ -91,6 +115,51 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="20dp">
+
+                    <EditText
+                        android:id="@+id/firstNameInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:hint="@string/first_name_hint"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:inputType="textPersonName"
+                        android:background="@drawable/bg_pill_input"
+                        android:backgroundTint="#F3F4F6"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:layout_marginBottom="12dp"
+                        android:autofillHints="none"/>
+
+                    <EditText
+                        android:id="@+id/middleNameInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:hint="@string/middle_name_hint"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:inputType="textPersonName"
+                        android:background="@drawable/bg_pill_input"
+                        android:backgroundTint="#F3F4F6"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:layout_marginBottom="12dp"
+                        android:autofillHints="none"/>
+
+                    <EditText
+                        android:id="@+id/lastNameInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:hint="@string/last_name_hint"
+                        android:textColorHint="#000000"
+                        android:textColor="#000000"
+                        android:inputType="textPersonName"
+                        android:background="@drawable/bg_pill_input"
+                        android:backgroundTint="#F3F4F6"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
+                        android:layout_marginBottom="12dp"
+                        android:autofillHints="none"/>
 
                     <EditText
                         android:id="@+id/nationalIdInput"

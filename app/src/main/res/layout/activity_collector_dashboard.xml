@@ -142,10 +142,10 @@
                                 android:textAllCaps="false"/>
 
                             <Button
-                                android:id="@+id/withdrawBtnHome"
+                                android:id="@+id/redeemCreditsBtnHome"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/withdraw"
+                                android:text="@string/redeem_credits"
                                 android:backgroundTint="#D1FAE5"
                                 android:textColor="#0F172A"
                                 app:cornerRadius="12dp"
@@ -382,6 +382,24 @@
                             android:textAllCaps="false"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recent Withdrawals"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:layout_marginBottom="12dp"
+                    tools:ignore="HardcodedText"/>
+
+                <LinearLayout
+                    android:id="@+id/withdrawalsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="80dp">
+                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>
